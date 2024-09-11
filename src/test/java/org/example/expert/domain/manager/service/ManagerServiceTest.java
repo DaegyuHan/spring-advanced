@@ -121,4 +121,16 @@ class ManagerServiceTest {
         assertEquals(managerUser.getId(), response.getUser().getId());
         assertEquals(managerUser.getEmail(), response.getUser().getEmail());
     }
+
+    @Test
+    void saveManager() {
+    }
+
+    @Test
+    void getManagers() {
+    }
+
+    @Test
+    void deleteManager() {
+    }
 }

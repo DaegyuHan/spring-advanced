@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.time.LocalDateTime;
+
 @Slf4j
 @Aspect
 @Component
@@ -23,13 +25,13 @@ public class AccessLogRecordAop {
     public Object adviceAnnotatiton(ProceedingJoinPoint joinPoint) throws Throwable {
 
         // API 요청 시각 확인
-        long startTime = System.currentTimeMillis();
+        LocalDateTime startTime = LocalDateTime.now();
 
         // HttpServletRequest 를 가져오기
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
         // API 요청 URL
-        String requestUrl = request.getRequestURI();
+        String requestUri = request.getRequestURI();
 
         // 요청한 사용자의 ID (헤더 또는 클레임에서 가져올 수 있음)
         long userId = (long) request.getAttribute("userId");
@@ -40,7 +42,7 @@ public class AccessLogRecordAop {
 
             log.info("::: API 요청 시각 : {}", startTime);
             log.info("::: 요청한 사용자 ID : {}", userId);
-            log.info("::: API 요청 URL : {}", requestUrl);
+            log.info("::: API 요청 URL : {}", requestUri);
 
         return proceed;
 
