@@ -9,14 +9,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(AnnotationAwareAspectJAutoProxyCreator.class)
 class CommentAdminServiceTest {
+
 
     @InjectMocks
     private CommentAdminService commentAdminService;
@@ -47,6 +52,7 @@ class CommentAdminServiceTest {
         // then
         // verify(commentRepository, times(1)).deleteById(anyLong());
         assertTrue(commentRepository.findById(commentId).isEmpty());
+
     }
 
 

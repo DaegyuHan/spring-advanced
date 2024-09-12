@@ -8,6 +8,8 @@ import org.example.expert.domain.comment.repository.CommentRepository;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.common.exception.ServerException;
+import org.example.expert.domain.manager.entity.Manager;
+import org.example.expert.domain.manager.repository.ManagerRepository;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.entity.User;
@@ -34,6 +36,8 @@ class CommentServiceTest {
     private CommentRepository commentRepository;
     @Mock
     private TodoRepository todoRepository;
+    @Mock
+    private ManagerRepository managerRepository;
     @InjectMocks
     private CommentService commentService;
 
@@ -62,17 +66,39 @@ class CommentServiceTest {
         CommentSaveRequest request = new CommentSaveRequest("contents");
         AuthUser authUser = new AuthUser(1L, "email", UserRole.USER);
         User user = User.fromAuthUser(authUser);
-        Todo todo = new Todo("title", "title", "contents", user);
+        Todo todo = new Todo("title", "title", "weather", user);
+        ReflectionTestUtils.setField(todo, "id", todoId);
         Comment comment = new Comment(request.getContents(), user, todo);
 
         given(todoRepository.findById(anyLong())).willReturn(Optional.of(todo));
         given(commentRepository.save(any())).willReturn(comment);
-
+        given(managerRepository.existsManagerByUser_IdAndTodo_id(anyLong(), anyLong())).willReturn(true); // 담당자 존재
         // when
         CommentSaveResponse result = commentService.saveComment(authUser, todoId, request);
 
         // then
         assertNotNull(result);
+    }
+
+    @Test
+    public void comment_해당_댓글의_일정에_등록된_담당자가_아니어서_댓글작성실패한다() {
+        // given
+        long todoId = 2L;
+        CommentSaveRequest request = new CommentSaveRequest("contents");
+        AuthUser authUser = new AuthUser(1L, "email", UserRole.USER);
+        User user = User.fromAuthUser(authUser);
+        Todo todo = new Todo("title", "title", "weather", user);
+        ReflectionTestUtils.setField(todo, "id", todoId);
+
+        given(todoRepository.findById(anyLong())).willReturn(Optional.of(todo));
+        given(managerRepository.existsManagerByUser_IdAndTodo_id(anyLong(),anyLong())).willReturn(false); // 담당자 존재
+        // when
+        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
+            commentService.saveComment(authUser, todoId, request);
+        });
+
+        // then
+        assertEquals("해당 댓글의 일정에 등록된 담당자가 아닙니다." , exception.getMessage());
     }
 
     @Test

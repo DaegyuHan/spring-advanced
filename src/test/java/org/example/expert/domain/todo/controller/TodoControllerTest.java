@@ -39,7 +39,6 @@ class TodoControllerTest {
     private TodoService todoService;
 
 
-
     @Autowired
     private TodoController todoController;
 
