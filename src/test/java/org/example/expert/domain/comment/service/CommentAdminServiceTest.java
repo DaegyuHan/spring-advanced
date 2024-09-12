@@ -16,7 +16,7 @@ import static org.mockito.Mockito.doNothing;
 
 @ExtendWith(MockitoExtension.class)
 @Import(AnnotationAwareAspectJAutoProxyCreator.class)
-class CommentAdminControllerTest {
+class CommentAdminServiceTest {
 
     @InjectMocks
     private CommentAdminService commentAdminService;

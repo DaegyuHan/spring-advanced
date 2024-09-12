@@ -12,6 +12,7 @@ import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.enums.UserRole;
 import org.example.expert.domain.user.repository.UserRepository;
+import org.example.expert.data.common.CommonDataSetting;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +25,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ManagerServiceTest {
@@ -123,14 +126,63 @@ class ManagerServiceTest {
     }
 
     @Test
-    void saveManager() {
+    void manager_담당자_등록() {
+        // given
+        // 유저 생성
+        AuthUser authUser = new AuthUser(1L, "a@a.com", UserRole.USER);
+        User user1 = User.fromAuthUser(authUser);  // 일정을 만든 유저
+
+        // 일정 생성
+        long todoId = 1L;
+        Todo todo = new Todo("title", "contents", "weather", user1);
+        ReflectionTestUtils.setField(todo, "id", todoId);
+
+        given(todoRepository.findById(anyLong())).willReturn(Optional.of(todo));
+
+        // 담당자 유저 생성
+        long userId = 2L;
+        User managerUser =  new User("email", "pwd", UserRole.USER);
+        ReflectionTestUtils.setField(managerUser, "id", userId);
+        given(userRepository.findById(userId)).willReturn(Optional.of(managerUser));
+        ManagerSaveRequest request = new ManagerSaveRequest(userId);
+
+        long managerId = 1L;
+        Manager savedManagerUser = new Manager(managerUser, todo);
+        ReflectionTestUtils.setField(savedManagerUser, "id", managerId);
+        // 담당자 등록
+        given(managerRepository.save(any(Manager.class))).willReturn(savedManagerUser);
+
+
+
+        // when
+        ManagerSaveResponse response = managerService.saveManager(authUser, todo.getId(), request);
+        // then
+        assertNotNull(response);
+        assertEquals(managerId, response.getId());
+        assertEquals(2, response.getUser().getId());
     }
 
-    @Test
-    void getManagers() {
-    }
+
 
     @Test
-    void deleteManager() {
+    void manager_담당자_삭제() {
+        // given
+        // 유저 생성
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(CommonDataSetting.getUserSuccessRegister()));
+        // 일정 생성
+        given(todoRepository.findById(anyLong())).willReturn(Optional.of(CommonDataSetting.getTodoSuccessRegister()));
+        // 담당자 유저 생성
+        given(managerRepository.findById(anyLong())).willReturn(Optional.of(CommonDataSetting.getManagerSuccessRegister()));
+
+        doNothing().when(managerRepository).delete(any(Manager.class));
+        // when
+
+        managerService.deleteManager(
+                CommonDataSetting.getUserSuccessRegister().getId(),
+                CommonDataSetting.getTodoSuccessRegister().getId(),
+                CommonDataSetting.getManagerSuccessRegister().getId());
+
+        //then
+        verify(managerRepository, times(1)).delete(any(Manager.class));
     }
 }

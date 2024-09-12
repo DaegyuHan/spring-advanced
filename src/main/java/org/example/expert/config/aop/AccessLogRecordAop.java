@@ -30,7 +30,7 @@ public class AccessLogRecordAop {
         // HttpServletRequest 를 가져오기
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
-        // API 요청 URL
+        // API 요청 URI
         String requestUri = request.getRequestURI();
 
         // 요청한 사용자의 ID (헤더 또는 클레임에서 가져올 수 있음)
