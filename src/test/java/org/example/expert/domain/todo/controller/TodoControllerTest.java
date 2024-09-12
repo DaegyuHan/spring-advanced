@@ -33,7 +33,7 @@ class TodoControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper;
 
     @MockBean
     private TodoService todoService;
